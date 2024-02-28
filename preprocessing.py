@@ -29,8 +29,10 @@ import keras
 keras.utils.set_random_seed(44)
 tf.config.experimental.enable_op_determinism()
 
+#create generator class to process all of the data before the model
 class Data_Gen:
     def __init__(self) -> None:
+        # insert data
         self.dataset_path = "gaussian_filtered_images"
         self.train, self.valid, self.test = None, None, None
         self.train_gen, self.valid_gen, self.test_gen = self.make_dataframe()
@@ -42,6 +44,7 @@ class Data_Gen:
         img_path = []
         labels = []
 
+        # organize images into designated classes 
         for c in classes:
             class_path = os.path.join(self.dataset_path, c)
             class_label = c
@@ -50,20 +53,22 @@ class Data_Gen:
                 img_p = os.path.join(class_path, img)
                 img_path.append(img_p)
                 labels.append(class_label)
-
+        # add the paths and labels of images to a dataframe for easier processing
         df = pd.DataFrame({'Paths': img_path,
                         'Labels': labels})
 
-
+        # utilize a train test split to split the train set into 90% of the data
         train, val = train_test_split(df, test_size = 0.1, random_state = 44, shuffle = True)
 
-        # splitting validation and test dataframe
+        # splitting validation and test dataframe to split valid and test to 5% and 5%
         valid, test = train_test_split(val, test_size = 0.5, random_state = 44, shuffle = True)
 
+        # instantiate the train, valid, test variables
         self.train = train
         self.valid = valid
         self.test = test
 
+        # used for data augmentation on the train set 
         datagen = ImageDataGenerator(
             width_shift_range=0.2,
             height_shift_range=0.2,
@@ -71,6 +76,7 @@ class Data_Gen:
             fill_mode='nearest'
         )
 
+        # create train generator with data augmentation
         train_gen = datagen.flow_from_dataframe(
             dataframe = train,
             x_col = "Paths",
@@ -79,6 +85,7 @@ class Data_Gen:
             batch_size = 32,
             class_mode = "categorical")
 
+        # create valid generator with no data augmentation 
         valid_gen = ImageDataGenerator().flow_from_dataframe(
             dataframe = valid,
             x_col = "Paths",
@@ -87,6 +94,7 @@ class Data_Gen:
             batch_size = 32,
             class_mode = "categorical")
 
+        # create test generator with no data augmentation 
         test_gen = ImageDataGenerator().flow_from_dataframe(
             dataframe = test,
             x_col = "Paths",
