@@ -39,6 +39,7 @@ class Model:
 
 # create pre trained model 
     def create_model(self):
+        # instantiate the EfficientNetB3 model with parameters
         base_model=tf.keras.applications.EfficientNetB3(
             include_top=False,
             weights="imagenet",
@@ -52,7 +53,7 @@ class Model:
         for layer in base_model.layers[:fine_tune_at]:
             layer.trainable = False
 
-        # adding layers to EfficientNetB3 model
+        # adding dense layers to EfficientNetB3 model
         model=kb.Sequential([
             base_model,
             kb.layers.Flatten(),
@@ -64,6 +65,8 @@ class Model:
             kb.layers.Dense(5, activation='softmax')
         ])
 
+        # compile model and add optimizers
+        # computes the evaluation metrics
         model.compile(optimizer=kb.optimizers.Adam(learning_rate=0.001), loss='categorical_crossentropy', metrics=['accuracy', Eval.precision, Eval.recall, Eval.f1score])
 
         model.summary()
@@ -74,6 +77,7 @@ class Model:
                             epochs = 50,
                             validation_data = self.valid_gen
                             )
+        # set model and history to __init__
         self.model = model
         self.history = history
 
