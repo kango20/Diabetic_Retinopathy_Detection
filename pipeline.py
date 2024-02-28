@@ -3,7 +3,7 @@ import model
 import evaluation
 import visualization
 
-
+# create pipeline to run full code with evaluation and visualizations
 datagen = preprocessing.Data_Gen()
 
 model = model.Model(datagen.train_gen, datagen.valid_gen, datagen.test_gen)
